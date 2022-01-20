@@ -20,7 +20,7 @@ class Tree
   attr_reader :root
 
   def initialize(array)
-    @root = build_tree(array)
+    @root = build_tree(array.uniq.sort)
   end
 
   def build_tree(array)
@@ -120,7 +120,7 @@ class Tree
           yield listed_node
         end
       else
-        p preorder_list.map(&:data)
+        preorder_list.map(&:data)
       end
     end
   end
@@ -135,7 +135,7 @@ class Tree
           yield listed_node
         end
       else
-        p inorder_list.map(&:data)
+        inorder_list.map(&:data)
       end
     end
   end
@@ -150,7 +150,7 @@ class Tree
           yield listed_node
         end
       else
-        p postorder_list.map(&:data)
+        postorder_list.map(&:data)
       end
     end
   end
@@ -182,14 +182,12 @@ class Tree
     end
   end
 
-  def balanced?(node)
-    if (height(node.left.data) - height(node.right.data)).abs > 1
-      return false
-    else
-      true
-    end
+  def balanced?
+    edges = (find_leaves.map { |node_array| node_array[1] }).minmax
+    (edges[0] - edges[1]).abs <= 1
+  end
+
+  def rebalance
+    @root = build_tree(inorder)
   end
 end
-
-test = Tree.new([1, 2, 3, 5, 6, 8, 11, 15, 18, 19, 21, 29, 33, 213, 515])
-test.pretty_print
