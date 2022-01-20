@@ -9,6 +9,10 @@ class Node
     @left = left
     @right = right
   end
+
+  def leaf?
+    left.nil? && right.nil? ? true : false
+  end
 end
 
 # Stores the root of the tree, which comes from #build_tree
@@ -106,20 +110,86 @@ class Tree
     level_order(queue, level_order_list, &block)
   end
 
-#   def preorder(node = @root, preorder_list = [])
-#     preorder_list << node
-#     preorder(node.left, preorder_list) if node.left
-#     preorder(node.right, preorder_list) if node.right
-#     if block_given? && node == root
-#       preorder_list.each do |node|
-#         yield node
-#       end
-#     else
-#       p preorder_list.map(&:data)
-#     end
-#   end
+  def preorder(node = @root, preorder_list = [])
+    preorder_list << node
+    preorder(node.left, preorder_list) if node.left
+    preorder(node.right, preorder_list) if node.right
+    if node == @root
+      if block_given?
+        preorder_list.each do |listed_node|
+          yield listed_node
+        end
+      else
+        p preorder_list.map(&:data)
+      end
+    end
+  end
+
+  def inorder(node = @root, inorder_list = [])
+    inorder(node.left, inorder_list) if node.left
+    inorder_list << node
+    inorder(node.right, inorder_list) if node.right
+    if node == @root
+      if block_given?
+        inorder_list.each do |listed_node|
+          yield listed_node
+        end
+      else
+        p inorder_list.map(&:data)
+      end
+    end
+  end
+
+  def postorder(node = @root, postorder_list = [])
+    postorder(node.left, postorder_list) if node.left
+    postorder(node.right, postorder_list) if node.right
+    postorder_list << node
+    if node == @root
+      if block_given?
+        postorder_list.each do |listed_node|
+          yield listed_node
+        end
+      else
+        p postorder_list.map(&:data)
+      end
+    end
+  end
+
+  def height(value)
+    find_leaves(find(value)).max { |a, b| a[1] <=> b[1]}[1]
+  end
+
+  def find_leaves(node = @root, leaves_list = [], edges = 0)
+    if node&.leaf?
+      return leaves_list << [node, edges]
+    end
+    return nil if node.nil?
+
+    find_leaves(node.left, leaves_list, edges + 1)
+    find_leaves(node.right, leaves_list, edges + 1)
+    leaves_list
+  end
+
+  def depth(value, node = @root, edges = 0)
+    return edges if node.data == value
+    return if node.data > value && node.left.nil?
+    return if node.data < value && node.right.nil?
+
+    if node.data > value
+      depth(value, node.left, edges + 1)
+    else
+      depth(value, node.right, edges + 1)
+    end
+  end
+
+  def balanced?(node)
+    if (height(node.left.data) - height(node.right.data)).abs > 1
+      return false
+    else
+      true
+    end
+  end
 end
 
-test = Tree.new([3, 5, 6, 8, 11, 15, 18])
+test = Tree.new([1, 2, 3, 5, 6, 8, 11, 15, 18, 19, 21, 29, 33, 213, 515])
 test.pretty_print
-test.preorder
